@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block dropdown %}
+    
+
+{% endblock dropdown %}
+
+{% block content %}
+
+	<div class = "d-flex justify-content-center align-items-center container text-center">
+		<div class = "col-xs-6">
+			<label for="year" class="text-center">Select Year</label>
+      <select id="year" class="form-control form-control-lg">
+        <option value="2016" selected="selected">2016</option>
+        <option value="2015">2015</option>
+        <option value="2014">2014</option>
+        <option value="2013">2013</option>
+        <option value="2012">2012</option>
+        <option value="2011">2011</option>
+        <option value="2010">2010</option>
+        <option value="2009">2009</option>
+      </select>
+      </div>
+		<div class = "col-xs-6">
+			<label for="dataType">Select Map Type</label>
+      <select id="dataType" class="form-control form-control-lg">
+        <option value="IN" selected="selected">Migration In-Flow</option>
+        <option value="OUT">Migration Out-Flow</option>
+        <option value="NET">Net Migration</option>
+        <option value="MED_INC">Median List Price</option>
+        <option value="RENT">Average Rent</option>
+      </select>
+	</div>
+	</div>
+   </form>
+
+  <div id="map-holder">
+		<div class="container fill">
+		<div id="map"></div>
+		</div>
+	</div>
+{% endblock content %}

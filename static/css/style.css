@@ -1,0 +1,78 @@
+#map
+{
+    width: 100px;
+    height: 100px;
+    min-height: 75%;
+    min-width: 100%;
+    display: block;
+}
+
+body {
+	padding-top: 0px;
+	margin: 0px;
+    background-color: white;
+}
+
+html, body
+{
+    height: 100%;
+}
+
+h7 {
+    color: white;
+}
+
+
+#map-holder{
+    height: 100%;
+}
+
+.fill
+{
+    min-height: 100%;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+.container{
+    max-width:60em;
+    padding: 0.2em;
+}
+
+.navbar {
+    background-color: rgb(220,20,60);
+}
+.navbar-brand {
+   background-color: rgb(220,20,60);
+   font-weight: bold;
+   color: white;
+}
+
+.dropdown {
+   color: white;
+} 
+
+@media (max-width: 480px) {
+  .navbar {
+    background-color: rgb(220,20,60);
+}
+
+    .navbar-brand {
+         background-color: rgb(220,20,60);
+         font-weight: bold;
+         color: rgb(220,20,60);
+}}
+
+body {
+font-family: 'Raleway', sans-serif;
+}
+
+label{
+	color:rgb(220,20,60);
+}
+
+select{
+	background-color:rgba(220,20,60, 0.05) !important;
+	color:rgb(220,20,60) !important;	
+}
