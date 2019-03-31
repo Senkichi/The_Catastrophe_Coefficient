@@ -26,6 +26,9 @@ parse_url <- function(x=NULL){
   )))
 }
 
+#' web scraping interface that parses out full-path URL's for 30 arc-second
+#' (900m) worldclim data.
+#' @export
 scrape_worldclim <- function(base_url="http://worldclim.org/cmip5_30s",
                              models=NULL, # two-letter codes for CMIP model
                              climate=FALSE,
@@ -93,23 +96,7 @@ scrape_worldclim <- function(base_url="http://worldclim.org/cmip5_30s",
   }
   # assume our hrefs into hrefs_final and check for "current" hrefs, if needed
   hrefs_final <- hrefs_future
-  # append "current" climate if it was requested
-  if (start_of_century){
-    # append bioclim and/or original climate variables to final fetch-list
-    if (bioclim){
-      hrefs_final <- append(
-        hrefs_final,
-        grep_by(hrefs_current, pattern = "/bi.[0-9]")
-      )
-    }
-    if (climate){
-      hrefs_final <- append(
-        hrefs_final,
-        grep_by(hrefs_current,
-                pattern ="/tmax.[0-9]|/tmean.[0-9]|/tmin.[0-9]|/prec_")
-      )
-    }
-  }
+  
   # grep across resolutions
   if(!is.null(resolutions)){
     hrefs_final <- grep_by(
@@ -135,6 +122,24 @@ scrape_worldclim <- function(base_url="http://worldclim.org/cmip5_30s",
     )
   } else if (is.null(models)){
     warning("no CMIP5 models specified by user")
+  }
+  
+  # append "current" climate if it was requested
+  if (start_of_century){
+    # append bioclim and/or original climate variables to final fetch-list
+    if (bioclim){
+      hrefs_final <- append(
+        hrefs_final,
+        grep_by(hrefs_current, pattern = "/bi.[0-9]")
+      )
+    }
+    if (climate){
+      hrefs_final <- append(
+        hrefs_final,
+        grep_by(hrefs_current,
+                pattern ="/tmax.[0-9]|/tmean.[0-9]|/tmin.[0-9]|/prec_")
+      )
+    }
   }
   # return URLs to user
   return(unlist(lapply(hrefs_final, FUN = parse_url)))
@@ -218,7 +223,7 @@ build_worldclim_stack <- function(vars=NULL,
     all_vars <- grep_by(all_vars, pattern=".70.")
   }
   if(bioclim){
-    climate_flags <- append(climate_flags,"bi")
+    climate_flags <- append(climate_flags,"bio")
   }
   if(climate){
     climate_flags <- append(climate_flags,"tm.*._|prec")
@@ -285,150 +290,6 @@ build_worldclim_stack <- function(vars=NULL,
   )
 }
 
-#' fetch and unpack missing worldclim climate data
-#' @export
-worldclim_fetch_and_unpack <- function(urls=NULL, exdir="climate_data"){
-  if(!dir.exists(exdir)){
-    dir.create(exdir)
-  }
-  existing_files <- list.files(exdir, full.names=T)
-  climate_zips <- unlist(lapply(
-    strsplit(urls,split="/"),
-    FUN = function(x) return(x[length(x)])
-  ))
-  if(sum(grepl(existing_files, pattern=paste(climate_zips,collapse="|")) ) != length(climate_zips) ){
-    cat(" -- fetching missing climate data\n")
-    # strip the existing files so we only match against the filename
-    fn_existing_files <- unlist(lapply(strsplit(
-      existing_files,
-      split="/"
-    ),
-    FUN=function(x) return(x[length(x)])
-    ))
-    missing_files <- which(!(climate_zips %in% fn_existing_files))
-    for(i in missing_files){
-      download.file(
-        urls[i],
-        destfile=file.path(paste(
-          exdir,
-          climate_zips[i],
-          sep = "/")
-        )
-      )
-    }
-  }
-  # check for existing rasters in exdir and unpack if none found
-  # also check zips against existing raster files, unpack zips which haven't beeen unpacked
-  existing_files <- list.files(exdir, pattern="bil$|tif$")
-  existing_zips <- list.files(exdir, pattern="zip$")
-  already_unzipped <- grep_by(existing_zips, pattern = "^^[^_|[0-0]]+")
-  if (sum(length(existing_zips)) != sum(length(already_unzipped))) {
-    cat(" -- unpacking climate data\n")
-    for(i in existing_zips[!(existing_zips %in% already_unzipped)]){
-      unzip(file.path(
-        paste(paste(getwd(), exdir, sep = "/"),
-              i,
-              sep="/")
-      ),
-      exdir=paste(getwd(),
-                  exdir,
-                  sep = "/")
-      )
-    }
-  } else {
-    warning("found existing rasters in the exdir -- leaving existing files")
-  }
-}
-
-#' return a RasterStack of worldclim data, parsed by flags and/or pattern
-#' @export
-build_worldclim_stack <- function(vars=NULL,
-                                  time=NULL,
-                                  bioclim=F,
-                                  climate=F,
-                                  pattern=NULL,
-                                  bounding=NULL){
-  all_vars <- list.files(
-    paste(getwd(),"climate_data", sep = "/"),
-    pattern="bil$|tif$",
-    full.names=T
-  )
-  climate_flags <- vector()
-  if(grepl(tolower(time), pattern="cur")){
-    # current climate data are always .bil files
-    all_vars <- grep_by(all_vars, pattern="bil$")
-  } else if(grepl(as.character(time),pattern="50")){
-    all_vars <- grep_by(all_vars, pattern=".50.")
-  } else if(grepl(as.character(time),pattern="70")){
-    all_vars <- grep_by(all_vars, pattern=".70.")
-  }
-  if(bioclim){
-    climate_flags <- append(climate_flags,"bi")
-  }
-  if(climate){
-    climate_flags <- append(climate_flags,"tm.*._|prec")
-  }
-  
-  all_vars <- grep_by(
-    all_vars,
-    pattern=paste(climate_flags, collapse = "|")
-  )
-  
-  if (!is.null(vars)){
-    # parse out weird worldclim var formating (differs by time scenario)
-    if(grepl(tolower(time), pattern="cur")){
-      v <- unlist(lapply(
-        strsplit(all_vars,split="/"),
-        FUN=function(x) x[length(x)]
-      ))
-      v <- lapply(
-        strsplit(v,split="_"),
-        FUN=function(x) x[length(x)]
-      )
-      v <- as.numeric(gsub(
-        v,
-        pattern = ".bil",
-        replacement = ""
-      ))
-      all_vars <- all_vars[ v %in% vars ]
-    } else if (grepl(tolower(time), pattern = "50|70")){
-      split <- gsub(as.character(time), pattern = "20", replacement = "")
-      v <- unlist(lapply(
-        strsplit(all_vars, split = "/"),
-        FUN = function(x) x[length(x)]
-      ))
-      v <- lapply(
-        strsplit(v,split=split),
-        FUN=function(x) x[length(x)]
-      )
-      v <- as.numeric(gsub(v, pattern=".tif", replacement = ""))
-      all_vars <- all_vars[ v %in% vars ]
-    }
-  }
-  # any final custom grep strings passed?
-  if(!is.null(pattern)){
-    all_vars <- grep_by(all_vars, pattern=pattern)
-  }
-  # stack and sort our variables before returning the stack to the user
-  all_vars <- raster::stack(all_vars)
-  if(!is.null(bounding)){
-    all_vars <- crop(all_vars, extent(bounding))
-  }
-  heuristic <- function(x){
-    sum(which(letters %in% unlist(strsplit(x[1], split="")))) +
-      as.numeric(x[2])
-  }
-  return(
-    all_vars[[
-      names(all_vars)[
-        order(unlist(lapply(
-          strsplit(names(all_vars), split="_"),
-          FUN=heuristic)
-        ))
-        ]
-      ]]
-  )
-}
 
 crop_and_combine <- function(worldclim,
                              landfire,
@@ -529,25 +390,33 @@ crop_and_combine <- function(worldclim,
 } 
 
 
-
+# read in fire data, currently as polugons of the fire boundaries with associated data
 fire <- readOGR('../data/Wildfires_1870_2015_Great_Basin_SHAPEFILE/Wildfires_1870_2015_Great_Basin.shp')
 
+#create a bounding box of the area of the fire dataset, to trim down the wordclim dataset later
 fire_extent <- raster::extent(fire)
 
+#turn that bounding box into a polygon
 fire_extent <- as(
   fire_extent,
   'SpatialPolygons'
 )
 
-fire_century <- fire[fire@data[,'Fire_Year'] > 2000,]
+
+#selects only the fire data of years we are interested in
+fire_century <- fire[fire@data[,'Fire_Year'] > 1970,]
+
+#assign value of 1 to all polygons, which we will use as the presence/absence responce variable
 fire_century@data[, 'presence'] <- 1
 
+#make sure geographic proections are consistent between files
 fire_century <- spTransform(fire_century, CRS("+proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs"))
 
 proj4string(fire_extent) <- CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0")
 
 fire_extent <- spTransform(fire_extent, CRS("+proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs"))
 
+#get worldclim data
 worldclim_fetch_and_unpack(urls = scrape_worldclim(
   bioclim=T,
   climate = T,
@@ -558,6 +427,7 @@ worldclim_fetch_and_unpack(urls = scrape_worldclim(
   models = "AC"
 ))
 
+#Get worldclim data for the future dataset
 future_worldclim <- raster::crop(
   build_worldclim_stack(
     time=50,
@@ -566,30 +436,32 @@ future_worldclim <- raster::crop(
   fire_extent
 )
 
-worldclim <- build_worldclim_stack(bioclim = T, climate = T, time = "cur", bounding = fire_extent)
+#get worldclim data for the current dataset
+worldclim <- raster::crop(
+  build_worldclim_stack(bioclim = T, time = "cur"),
+  fire_extent)
 
-fire_frame <- raster::merge(fire_raster, future_worldclim)
-  fire_frame <- cbind(fire_frame, response = fire_raster@data@values)
-
-
+#convert fire polygons to raster file, spatially consistent with worldclim
 fire_raster <- raster::rasterize(
   fire_century,
-  future_worldclim,
+  worldclim,
   field=c('presence')
 )
 
+#change na values to zero
 fire_raster[is.na(fire_raster)] <- 0
-fire_raster[over(fire_raster, fire_century), ] <- 1
 
-fire_raster
-
+#create a layer of centerpoints for each raster pixel, we will use these points to extract the data
+#values from each stacked raster layer underneath each point to create the final dataframe
 fire_points <- raster::rasterToPoints(fire_raster, spatial=T)
-fire_points@data[,'layer'] <- fire_points@data[,'layer'] > 0
-colnames(fire_points@data) <- "response"
 
-
+#extract fire data as a n length list of 1/0 values for the n pixels 
 raster_frame <- raster::extract(fire_raster, fire_points)
-worldclim_frame <- raster::extract(future_worldclim, fire_points)
+
+#extract worldclim data into its own frame at the same points, then bind the fire frame and the worldclim frame together
+#For analysis
+worldclim_frame <- raster::extract(worldclim, fire_points)
   worldclim_frame <- cbind(worldclim_frame, raster_frame)
 
-write.csv(worldclim_frame, 'beta_frame.csv')  
+#export file
+write.csv(worldclim_frame, 'bio_vars_frame.csv')  
