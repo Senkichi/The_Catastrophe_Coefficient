@@ -49,11 +49,8 @@
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><h7>Visualizations </h7> <span class="caret"></span></a>
 				<ul class="dropdown-menu">
 
-				  <!-- TODO: -->
-				  <!-- append code for dropdown items -->
-          <!--Example-->
-          <li><a href="animatedBubble.html">Animated Bubble Chart</a></li>
-				  <li><a href="graph.html">CPI Comparison</a></li>
+
+          <li><a href="animatedBubble.html">something else</a></li>
 
 				</ul>
 			  </li>
@@ -67,6 +64,9 @@
   {% block content %}{% endblock %}
 
   </body>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+ 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -74,5 +74,10 @@
   <script type="text/javascript" src="static/js/config.js"></script>
   <!-- Our JS -->
   <script type="text/javascript" src="static/js/app.js"></script>
-
+  
+  	<script>
+$(document).ready(function(){
+  $('[data-toggle="popover"]').popover(); 
+});
+</script>
 </html>
