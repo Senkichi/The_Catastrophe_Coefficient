@@ -1,0 +1,78 @@
+#map
+{
+    width: 100px;
+    height: 100px;
+    min-height: 75%;
+    min-width: 100%;
+    display: block;
+}
+
+body {
+	padding-top: 0px;
+	margin: 0px;
+    background-color: white;
+}
+
+html, body
+{
+    height: 100%;
+}
+
+h7 {
+    color: white;
+}
+
+
+#map-holder{
+    height: 100%;
+}
+
+.fill
+{
+    min-height: 100%;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+.container{
+    max-width:60em;
+    padding: 0.2em;
+}
+
+.navbar {
+    background-color: #ce2029;
+}
+.navbar-brand {
+   background-color: #ce2029;
+   font-weight: bold;
+   color: white;
+}
+
+.dropdown {
+   color: white;
+} 
+
+@media (max-width: 480px) {
+  .navbar {
+    background-color: #ce2029;
+}
+
+    .navbar-brand {
+         background-color: #ce2029;
+         font-weight: bold;
+         color: #ce2029;
+}}
+
+body {
+font-family: 'Raleway', sans-serif;
+}
+
+label{
+	color:#ce2029;
+}
+
+select{
+	background-color:rgba(12, 173, 167, 0.05) !important;
+	color:#2c7775 !important;	
+}

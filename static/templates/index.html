@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block dropdown %}
+    
+
+{% endblock dropdown %}
+
+{% block content %}
+
+	<div class = "d-flex justify-content-center align-items-center container text-center">
+		<div class = "col-xs-4">
+			<label for="year" class="text-center">Year</label>
+      <select id="year" class="form-control form-control-lg">
+        <option value="2030" selected="selected">2030</option>
+        <option value="2040">2040</option>
+        <option value="2050">2050</option>
+      </select>
+      </div>
+		<div class = "col-xs-4">
+			<label for="dataType">Prediction Type</label>
+      <select id="dataType" class="form-control form-control-lg">
+        <option value="3" selected="selected">3-degrees C</option>
+        <option value="6">6-degrees C</option>
+      </select>
+	</div>	  
+		<div class = "col-xs-4">
+			<label for="dataType">Algorithm</label>
+      <select id="dataType" class="form-control form-control-lg">
+        <option value="neural" selected="selected">Neural Network</option>
+        <option value="forest">Random Forest</option>
+        <option value="logistic">Logistic Regression</option>
+        <option value="linear">Linear Regression</option>
+      </select>
+	</div>
+	</div>
+   </form>
+
+  <div id="map-holder">
+		<div class="container fill">
+		<div id="map"></div>
+		</div>
+	</div>
+{% endblock content %}
