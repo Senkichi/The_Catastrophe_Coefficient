@@ -2,7 +2,8 @@
 var	year = d3.select("#year").node().value;
 var	model = d3.select("#model").node().value;
 var	algorithm = d3.select("#algorithm").node().value;
-var max = 3
+var sensitivity = d3.select("#sensitivity").node().value;
+var max = 3 * sensitivity
 var min = 0
 var heatmapLayer
 //var url = "./static/data/dummy_data.json"
@@ -83,6 +84,9 @@ document.getElementById("redraw").onclick = function() {
 	year = d3.select("#year").node().value;
 	model = d3.select("#model").node().value;
 	algorithm = d3.select("#algorithm").node().value;
+	sensitivity = d3.select("#sensitivity").node().value;
+	max = 3 * sensitivity
+	
 	url = `./api/v1/${year}/${model}/${algorithm}`
 	map.removeLayer(heatmapLayer);	
 	d3.json(url, function(data) {
