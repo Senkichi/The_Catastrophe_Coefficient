@@ -5,7 +5,7 @@ var	algorithm = d3.select("#algorithm").node().value;
 
 var url = "./static/data/dummy_data.json"
 
-//var url = "api/v1.0/{year}/{model}/{algorithm}"
+//var url = `api/v1.0/${year}/${model}/${algorithm}`
 
 var baseLayer = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
   attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
@@ -19,8 +19,7 @@ var baseLayer = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
 
 d3.json(url, function(data) {
   // Once we get a response, send the data.features object to the createFeatures function
-	console.log(data.length)
-	createFeatures({max: 200,data});
+	createFeatures({max: 200,min: 0,data});
 })
 
 function createFeatures(sourceData) {
@@ -54,9 +53,25 @@ var map = L.map("map", {
 	layers: [baseLayer, heatmapLayer]
   });
 
-console.log(sourceData.length)
+
+/*   var Legend = L.Control.extend({  
+  options: {
+    position: 'bottomright'
+  },
+
+  onAdd: function (map) {
+    var legend = L.DomUtil.create('div', 'map-legend', L.DomUtil.get('map'));
+
+    // here we can fill the legend with colors, strings and whatever
+	
+	
+	
+    return legend;
+  }
+}); */
+
+
 heatmapLayer.setData(sourceData);
 };
-
 
 
