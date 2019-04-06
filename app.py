@@ -25,6 +25,16 @@ db = client.weather
 def index():
     return render_template("index.html")
 
+@app.route("/2050h")
+@app.route('/2050h.html')
+def harsh_2050():
+	return render_template("2050h.html")
+
+@app.route("/2070m")
+@app.route('/2070m.html')
+def harsh_2070():
+	return render_template("2070m.html")
+
 # Set up api routes
 @app.route("/api/v1/<year>/<severity>/<algorithm>")
 def firePrediction(year,severity,algorithm):
