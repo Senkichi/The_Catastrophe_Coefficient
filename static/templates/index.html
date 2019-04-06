@@ -7,33 +7,37 @@
 {% block content %}
 
 	<div class = "d-flex justify-content-center align-items-center container text-center">
-		<div class = "col-xs-4">
+		<div class = "col-xs-3">
 			<label for="year" class="text-center">Year</label>
       <select id="year" class="form-control form-control-lg">
-        <option value="2050" selected="selected">2050</option>
-        <option value="2070">2070</option>
+        <option value="2070" selected="selected">2070</option>
+        <option value="2050">2050</option>
       </select>
       </div>
-		<div class = "col-xs-4">
+		<div class = "col-xs-3">
 		
 		  <label for="model" data-toggle="popover" title="Severity of climate change" 
 		  data-content = "driven by future pollution levels" data-trigger="hover" data-placement = "bottom" >
 		  Severity (?)</label>
 		  
           <select id="model" class="form-control form-control-lg" >
-          <option value="mild" selected="selected">Mild</option>
-          <option value="severe">Severe</option>
+          <option value="moderate" selected="selected">Moderate</option>
+          <option value="harsh">Harsh</option>
       </select>
 	</div>	  
-		<div class = "col-xs-4">
+		<div class = "col-xs-3">
 			<label for="algorithm">Algorithm</label>
       <select id="algorithm" class="form-control form-control-lg">
-        <option value="neural" selected="selected">Neural Network</option>
-        <option value="forest">Random Forest</option>
-        <option value="logistic">Logistic Regression</option>
-        <option value="linear">Linear Regression</option>
+        <option value="cnnsequential" selected="selected">Neural Network</option>
+        <option value="randomforest">Random Forest</option>
+        <option value="KNN">KNN*</option>
+        <option value="LogReg">Log Regression*</option>
       </select>
 	</div>
+	
+		<div class = "col-xs-3">
+		<button type="button" class="btn btn-danger" id="redraw">Redraw</button>
+		</div>
 	</div>
    </form>
 
