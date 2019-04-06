@@ -1,11 +1,23 @@
-# ACS Project Summary
+# Fire Prediction Project Summary
 
-- Using the Census.gov API (https://api.census.gov/data.html) we collected and stored ACS migration and housing data into a mongoDB for deployment into a flask dashboard application
+Using Worldclim climate data and historical fire data from Data.gov, we used 4 different algorithms to predict the likliehood of future fires. Our models were trained using historical climatic data, which were then applied to Worldclim predictive datasets (2040, 2070) with 2 levels of climate change severity (driven by future air pollution levels).
+
+Heroku: https://ucbx-fire-prediction-2019.herokuapp.com/
 
 ## Extraction, Transform
 
-- In python we pulled Census.gov, kaggle.gov, data.gov, and Wikipedia data into a Pandas Dataframe
-- We then combined our various df's into a master census dataframe and performed cleanup of data inconsistencies
+- In R we extracted climate change data from:
+https://catalog.data.gov/dataset/combined-wildfire-dataset-for-the-united-states-and-certain-territories-1870-2015
+http://www.worldclim.org/version1
+- Exported as CSV and read into python and loaded into Pandas DataFrames for the creation of our models
+
+## Machine Learning
+
+Four Prediction Models: 
+1. Neural Network
+2. Random Forest
+3. KNN
+4. Logistic Regression 
 
 ## Load
 
@@ -22,6 +34,5 @@
 
 ## Charting
 
-- Leaflet map with plotted circles using longitude/latitude data with selectable dropdowns for years and data type
-- Animated Bubble Chart (Plotly.js)
-- Plot.js Line Chart
+- Leaflet map with Patrick Wied's heatmap plugin showing relative fire likliehood with options to adjust the year, degree of climate change, heatmap sensitivity, and algorithm used
+- Collection of charts created using Tableau 
