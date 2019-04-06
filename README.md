@@ -7,6 +7,7 @@ Heroku: https://ucbx-fire-prediction-2019.herokuapp.com/
 ## Extraction, Transform
 
 - In R we extracted climate change data from:
+
 https://catalog.data.gov/dataset/combined-wildfire-dataset-for-the-united-states-and-certain-territories-1870-2015
 
 http://www.worldclim.org/version1
