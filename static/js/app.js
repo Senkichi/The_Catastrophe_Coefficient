@@ -21,7 +21,7 @@ var baseLayer = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
 
 var map = L.map("map", {
     center: [36.7783, -119.4179],
-    zoom: 6,
+    zoom: 5,
 	layers: [baseLayer]
   });
 
