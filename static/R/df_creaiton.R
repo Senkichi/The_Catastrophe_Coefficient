@@ -1,13 +1,28 @@
 setwd('D:/Programs/GitHub/The_Catastrophe_Coefficient/static/data')
 
-require(tcltk)
-
-require(sqldf)
+require(devtools)
+require(OpenIMBCR)
 require(rgdal)
-require(raster)
-require(parallel)
-require(landscapeAnalysis)
+require(tidyverse)
+require(vegan)
 require(sp)
+require(data.table)
+require(rlang)
+
+require(raster)
+require(rgeos)
+require(tcltk)
+require(parallel)
+require(sqldf)
+require(doParallel)
+require(xml2)
+require(rvest)
+require(foreign)
+require(BrotherOrange)
+require(curl)
+
+removeTmpFiles(h=0)
+
 
 grep_by <- function(x, pattern=NULL){
   x[grepl(as.character(x), pattern = pattern)]
@@ -223,7 +238,7 @@ build_worldclim_stack <- function(vars=NULL,
     all_vars <- grep_by(all_vars, pattern=".70.")
   }
   if(bioclim){
-    climate_flags <- append(climate_flags,"bio")
+    climate_flags <- append(climate_flags,"bi")
   }
   if(climate){
     climate_flags <- append(climate_flags,"tm.*._|prec")
@@ -393,6 +408,8 @@ crop_and_combine <- function(worldclim,
 # read in fire data, currently as polugons of the fire boundaries with associated data
 fire <- readOGR('../data/Wildfires_1870_2015_Great_Basin_SHAPEFILE/Wildfires_1870_2015_Great_Basin.shp')
 
+us_boundary <- readOGR('../data/gz_2010_us_outline_5m/gz_2010_us_outline_5m.shp')
+
 #create a bounding box of the area of the fire dataset, to trim down the wordclim dataset later
 fire_extent <- raster::extent(fire)
 
@@ -416,25 +433,19 @@ proj4string(fire_extent) <- CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lo
 
 fire_extent <- spTransform(fire_extent, CRS("+proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs"))
 
+us_boundary <- spTransform(us_boundary, CRS("+proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs"))
+  us_boundary <- gUnaryUnion(us_boundary)
+
 #get worldclim data
 worldclim_fetch_and_unpack(urls = scrape_worldclim(
   bioclim=T,
-  climate = T,
-  start_of_century = T,
   mid_century = T,
   end_of_century = T,
   scen_45 = T,
-  models = "AC"
+  scen_85 = T,
+  models = "BC"
 ))
 
-#Get worldclim data for the future dataset
-future_worldclim <- raster::crop(
-  build_worldclim_stack(
-    time=50,
-    bioclim=T,
-    climate = T),
-  fire_extent
-)
 
 #get worldclim data for the current dataset
 worldclim <- raster::crop(
@@ -444,7 +455,7 @@ worldclim <- raster::crop(
 #convert fire polygons to raster file, spatially consistent with worldclim
 fire_raster <- raster::rasterize(
   fire_century,
-  worldclim,
+  future_worldclim,
   field=c('presence')
 )
 
@@ -455,8 +466,10 @@ fire_raster[is.na(fire_raster)] <- 0
 #values from each stacked raster layer underneath each point to create the final dataframe
 fire_points <- raster::rasterToPoints(fire_raster, spatial=T)
 
-#extract fire data as a n length list of 1/0 values for the n pixels 
+#extract fire data and coordinates as a n length list of 1/0 values for the n pixels 
 raster_frame <- raster::extract(fire_raster, fire_points)
+
+raster_frame <- cbind(fire_points@coords, raster_frame)
 
 #extract worldclim data into its own frame at the same points, then bind the fire frame and the worldclim frame together
 #For analysis
@@ -465,3 +478,39 @@ worldclim_frame <- raster::extract(worldclim, fire_points)
 
 #export file
 write.csv(worldclim_frame, 'bio_vars_frame.csv')  
+
+
+#create dataframes for the future worldclim variables over the US
+
+#create rough bounding box since land boundary cropping takes fucing forever
+us_extent <- raster::extent(
+  -124.7844079,
+  -66.9513812,
+  24.7433195,
+  49.3457868
+)
+us_extent <- as(
+  us_extent,
+  'SpatialPolygons'
+)
+
+raster::projection(us_extent) <-
+  sp::CRS(raster::projection("+init=epsg:4326"))
+
+
+#Get worldclim data for the future dataset
+future_worldclim <- build_worldclim_stack(bioclim = T, time = "70", pattern = '45')
+  future_worldclim <- crop(future_worldclim, us_extent, filename = 'future_worldclim', overwrite = T)
+
+
+#create a layer of centerpoints for each raster pixel, we will use these points to extract the data
+#values from each stacked raster layer underneath each point to create the final dataframe
+future_points <- raster::rasterToPoints(future_worldclim, spatial=T, filename = 'future_points', overwrite = T)
+
+#extract future data and coordinates as a n length list for the n pixels, and bind to list of coordinates
+future_frame <- raster::extract(future_worldclim, future_points)
+
+future_frame <- cbind(future_points@coords, future_frame)
+
+
+write.csv(future_frame, '2070_rcp45_bc_frame.csv')
